@@ -1,0 +1,146 @@
+
+Class Account < ActiveRecord::Base
+end
+
+# creates a new account object in memory and a new account record in our database
+newacc = Account.new
+newacc.Username = "Kevin"
+newacc.Password = "Marshall"
+newacc.save
+
+# creates an Account object in memory from data in Account table with ID of 1
+# (equivalent to the ANSI SQL statement of "select * from accounts where ID = 1")
+findacc = Account.find(1)
+
+# deletes records from database that have username of "Kevin"
+Account.delete("username = 'Kevin'")
+
+newacc = Account.new(:username => "Kevin")
+newacc.save #=> creates the new record in the account table
+
+temp = Account.find(1) # => selects the record associated with id of 1 from the account table
+temp.username = 'Kevin' # => assigns a value to the username attribute of the object
+temp.save #=> does the actual update statement applying the changes we just stated.
+
+Account.destroy_all(1) #=> deletes the record in the account table with id of 1
+
+Account.update(1, "Username = Kevin")
+
+Account.delete(1)
+
+example = Account.new(:Account_Name => "Kevin Marshall", :Account_Username => "Falicon")
+
+example = Account.find(1)
+
+example.Account_Username = "Falicon"
+puts "Your username is now #{example.Account_Username}" 
+
+Example.save
+
+ActiveRecord::Base.establish_connection(:adapter => "db2", :database => "artest", :username => "kevin", :password => "test")
+
+ActiveRecord::Base.establish_connection(:adapter => "firebird", :database => "test", :host => "www.yourdbserver.com", :username => "kevin", :password => "test")
+
+ActiveRecord::Base.establish_connection(:adapter => "frontbase", :database => "test", :host => "www.yourdbserver.com")
+MySQL Parameters
+
+ActiveRecord::Base.establish_connection(:adapter => "mysql", :database => "test",
+:username => "kevin", :password => "test")
+
+ActiveRecord::Base.establish_connection(:adapter => "openbase", :database => "test", :host => www.yourdbserver.com, :username => "kevin", :password => "test")
+
+ActiveRecord::Base.establish_connection(:adapter => "oracle", :database => "test", :username => "kevin", :password => "test")
+
+ActiveRecord::Base.establish_connection(:adapter => "postgresql", :database => "test", :username => "kevin", :password => "test")
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlite", :database => "test")
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver", :database => "test", :username => "kevin", :password => "test", :host => "www.yourdbserver.com")
+
+ActiveRecord::Base.establish_connection(:adapter => "sybase", :database => "test", :host => "www.yourdbserver.com", :usrname => "kevin", :password => "test")
+
+require "rubygems"
+require_gem "activerecord"
+
+ActiveRecord::Base.establish_connection( 
+  :adapter => "mysql", 
+  :host => "localhost", 
+  :username => "project",
+  :database => "project_development")
+
+class Account < ActiveRecord::Base
+end
+
+account = Account.new
+account.username = "cpytel"
+account.save
+
+class Account < ActiveRecord::Base
+  set_table_name "AccountBean"
+end
+
+class Account < ActiveRecord::Base
+  set_primary_key "accountId"
+end
+
+account = Account.new
+account.id = "X5476"
+account.save
+
+puts account.account_number #=> X5476
+
+Account.find(1)
+
+Account.find_by_username("cpytel")
+
+Account.find(:all, :conditions => ["username  = ?", "cpytel"])
+
+account = Account.find_by_username("cpytel")
+
+account.destroy
+
+account = Account.find(1)
+# do a variety of things within your application…
+account.destroy
+puts "we just deleted the record with id of #{account.id} from the database"
+
+class Role < ActiveRecord::Base
+end
+
+class Account < ActiveRecord::Base
+  belongs_to :role
+end
+
+admin_role = Role.find_or_create_by_name("Administrator")
+
+account.role = admin_role
+
+require "rubygems"
+require_gem "activerecord"
+
+ActiveRecord::Base.establish_connection( 
+  :adapter => "mysql", 
+  :host => "localhost", 
+  :username => "project",
+  :database => "project_development")
+
+class Role < ActiveRecord::Base
+end
+
+class Account < ActiveRecord::Base
+  belongs_to :role
+end
+
+admin_role = Role.find_or_create_by_name("Administrator")
+
+account = Account.new
+account.username = "cpytel"
+account.role = admin_role
+account.save
+
+puts "#{account.username} (#{account.id}) is a(n) #{account.role.name}"
+# cpytel (1) is a(n) Administrator
+
+# comment out the following line to avoid deleting the created account 
+account.destroy
+puts "We have just deleted the #{account.username} account!"

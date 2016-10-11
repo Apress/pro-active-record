@@ -1,0 +1,338 @@
+create_table "products" do |t| 
+  t.column "shop_id",    :integer 
+  t.column "creator_id", :integer 
+  t.column "name",       :string,   :default => "Untitled" 
+  t.column "value",      :string,   :default => "Untitled" 
+  t.column "created_at", :datetime 
+  t.column "updated_at", :datetime 
+end 
+
+create_table :products do |t| 
+  t.integer :shop_id, :creator_id 
+  t.string  :name, :value, :default => "Untitled" 
+  t.timestamps 
+end
+
+require “dbi”
+
+begin
+
+  dbiexamp = DBI.connect(“DBI:Mysql:test:localhost”,”root”,”rootpass”) # => connect to DB
+  added = dbiexamp.do(“insert into account(account_name) values(‘Kevin’)”) # => add a record
+  puts “added #{added} records” # => added 1 records
+
+  dbiexamp.do(“update account set account_name = ‘Kevin Marshall’ where account_name = ‘Kevin’”) # => update record
+
+  records = dbiexamp.execute(“select * from account”)
+  records.fetch do |row|
+    puts “found account for #{row[“account_name”]}”
+  end
+
+ dbiexamp.do(“delete account where account_name = ‘Kevin Marshall’”) # => delete record
+
+rescue DBI::DatabaseError => error
+  puts “Error: #{error}”
+ensure
+  dbiexamp.disconnect if dbiexamp
+end
+
+
+require ‘og’
+
+class Account
+  property :account_name, String
+end
+
+Og.setup( { :destroy => false, :store => :mysql, :user => “root”, :password => “rootpass”, :name => “exampledb” }) # => establishes connection and creates any tables that are not yet there.
+
+test = Account.new
+test.account_name = “Kevin”
+test.save! # => saves the record into the account table
+
+accs = Account.first
+puts accs.account_name # => “Kevin”
+
+test.account_name = “Kevin Marshall”
+test.save!
+
+puts test.account_username # => Kevin Marshall
+test.delete! # => delete the record
+
+database1:
+  adapter: mysql
+  host: localhost
+  username: myuser
+  password: mypass
+  database: db1
+
+database2:
+  adapter: mysql
+  host: remote.host
+  username: youruser
+  password: yourpass
+  database: db2
+
+require “rubygems”
+require “activerecord”
+
+@config = YAML.load_file(File.join(File.dirname(__FILE__), ‘database.yml’))
+
+class LocalDatabase < ActiveRecord::Base
+  establish_connection @config[‘database1’]
+end
+
+class RemoteDatabase < ActiveRecord::Base
+  establish_connection @config[‘database2’]
+end
+
+class Customer < RemoteDatabase
+  has_many :users
+end
+
+class User < LocalDatabase
+  belongs_to :customer
+  has_on :email
+end
+
+class Email < LocalDatabase
+  belongs_to :user
+end
+
+Module LocalDb
+  class User < LocalDatabase
+    belongs_to :customer
+    has_on :email
+  end
+
+  class Email < LocalDatabase
+    belongs_to :user
+  end
+end
+
+Module RemoteDb
+  class User < RemoteDatabase
+    belongs_to :customer
+    has_on :email
+  end
+
+  class Email < RemoteDatabase
+    belongs_to :user
+  end
+end
+
+user = RemoteDb::User.find_by_name(‘Chad Pytel’, :include => [:email], :limit => 1)
+new_user = LocalDb::User.new user.attributes
+new_user.email = LocalDb::Email.new user.email.attributes
+new_user.save
+
+create_table(:accounts, :options => 'DEFAULT CHARSET=utf8') do |t|
+  t.column :first_name, :string
+  t.column :last_name, :string
+  t.column :email, :string
+end
+
+gem install uuidtools
+
+require ‘rubygems’
+require ‘uuidtools’
+
+module UUIDKeys
+  def before_create
+    self.id = UUID.timestamp_create().to_s
+  end
+end
+
+class User < ActiveRecord::Base
+  include UUIDKeys
+  # your additional model code
+end
+
+class UUIDKeyClass < ActiveRecord::Base
+  self.abstract_class = true
+
+  def before_create
+    self.id = UUID.timestamp_create().to_s
+  end
+end
+
+class User < UUIDKeyClass
+  # your additional model code
+end
+
+module TableLocking
+  def lock(options = {})
+    sql = “LOCK TABLES #{table_name}”
+    sql += ‘ WRITE’ if options[:write]
+    sql += ‘ READ’ if options[:read]
+    execute sql
+  end
+
+  def unlock
+    execute “UNLOCK TABLES”
+  end
+end
+
+class User < ActiveRecord::Base
+  include TableLocking
+  # your additional model code
+end
+
+User.lock(:read => true, :write => true)
+User.delete(1)
+User.unlock
+
+random_record = Model.find(:all)[rand(Model.count)]
+
+random_record = Model.find(rand(Model.count)+1)
+
+random_record = Model.find(:first, :conditions => [“id < ?”, Model.maximum(‘id’)])
+
+class Company < ActiveRecord::Base
+  has_many :employees
+end
+
+class Employee < ActiveRecord::Base
+  belongs_to :company
+end
+
+class Category < ActiveRecord::Base
+  has_many :products
+end
+
+class Product < ActiveRecord::Base
+  belongs_to :category
+end
+
+class Order < ActiveRecord::Base
+  has_many :line_items
+end
+
+class LineItem < ActiveRecord::Base
+  belongs_to :product
+  belongs_to :order
+end
+
+class User < ActiveRecord::Base
+  has_and_belongs_to_many :roles
+end
+
+class Roles < ActiveRecord::Base
+  has_and_belongs_to_many :users
+  has_and_belongs_to_many :permissions
+end
+
+class Permission < ActiveRecord::Base
+  has_and_belongs_to_many :roles
+end
+
+class Survey < ActiveRecord::Base
+  has_many :questions
+  has_many :responses
+end
+
+class Question < ActiveRecord::Base
+  belongs_to :survey
+  has_many :choices
+end
+
+class Choice < ActiveRecord::Base
+  belongs_to :question
+end
+
+class Response < ActiveRecord::Base
+  belongs_to :survey
+  has_many :response_choices
+end
+
+class ResponseChoice < ActiveRecord::Base
+  belongs_to :response
+  belongs_to :question
+  belongs_to :choice
+end
+
+class Page < ActiveRecord::Base
+  acts_as_tree
+  acts_as_list :scope => :parent
+end
+
+class Post < ActiveRecord::Base
+  has_many :comments, :dependent => true, :order => "created_at ASC"
+end
+
+class Comment < ActiveRecord::Base
+  belongs_to :post
+end
+
+class Users < ActiveRecord::Base
+  has_many :friends, :through => :relationships
+  has_many :relationships
+end
+
+class Relationship < ActiveRecord::Base
+  belongs_to :user
+  belongs_to :friend, :class => User
+end
+
+# file: validate_models.rake
+# task: rake db:validate_models
+namespace :db do
+  desc "Run model validations on all model records in database"
+  task :validate_models => :environment do
+    puts "-- records - model --"
+    Dir.glob(RAILS_ROOT + '/app/models/**/*.rb').each { |file| require file }
+    Object.subclasses_of(ActiveRecord::Base).select { |c|
+          c.base_class == c}.sort_by(&:name).each do |klass|
+      total = klass.count
+      printf "%10d - %s\n", total, klass.name
+      chunk_size = 1000
+      (total / chunk_size + 1).times do |i|
+        chunk = klass.find(:all, :offset => (i * chunk_size), :limit => chunk_size)
+        chunk.reject(&:valid?).each do |record|
+          puts "#{record.class}: id=#{record.id}"
+          p record.errors.full_messages
+          puts
+        end rescue nil
+      end
+    end
+  end
+end
+
+database:
+  adapter: mysql
+  host: localhost
+  username: myuser
+  password: mypass
+  database: db1
+
+
+require "rubygems"
+require_gem "activerecord"
+
+config_file = ARGV.shift
+environment = ARGV.shift
+
+@config = YAML.load_file(config_file)
+ARGV.each { |file| puts file; require file }
+
+Object.subclasses_of(ActiveRecord::Base).select { |c|
+  c.base_class == c}.sort_by(&:name).each do |klass|
+  klass.establish_connection @config[environment]
+  total = klass.count
+  printf "%10d - %s\n", total, klass.name
+  chunk_size = 1000
+  (total / chunk_size + 1).times do |i|
+    chunk = klass.find(:all, :offset => (i * chunk_size), :limit => chunk_size)
+    chunk.reject(&:valid?).each do |record|
+      puts "#{record.class}: id=#{record.id}"
+      p record.errors.full_messages
+      puts
+    end
+  end rescue nil
+end
+
+class Klass < ActiveRecord::Base
+  def number
+    attr = attributes_before_type_cast
+    "#{attr['number']}"
+  end
+end

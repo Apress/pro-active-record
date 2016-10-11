@@ -1,0 +1,560 @@
+
+# artest.rb ActiveRecord example code to test against
+class Artest
+
+  # set up our account class (ties to account table in DB)
+  class Account < ActiveRecord::Base
+  end
+
+  # make our connection to the MS SQL Server database
+  ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "localhost", :database => "myapp", :username => "sa", :password => "", :port => "1433")
+
+  def appreciate(account_id)
+    # return a message of appreciation
+    return Account.find(account_id.to_i).account_name + " is great!"
+  rescue
+    return nil
+  end
+
+  def insult(account_id)
+    # return a mean message
+    return Account.find(account_id.to_i).account_name + " is lame!"
+  end
+
+  def earnedmoney(account_id)
+    # return the money this account has earned
+    return Account.find(account_id.to_i).account_earned.to_f
+  rescue
+    return nil
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_equal("Kevin Marshall is great!", temp.appreciate(1).to_s)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert ("Kevin Marshall is great!" == temp.appreciate(1).to_s)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_nil(temp.appreciate(100).to_s)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_not_nil(temp.appreciate(1) == nil)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_equal(temp.appreciate(1).to_s, nil)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_in_delta(6.50, temp.earnedmoney(1), 0.05)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_raise ActiveRecord::RecordNotFound do
+      temp.insult(1000)
+    end
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    assert_nothing_raised do
+      t = 100.0
+      a = t * 50.0
+      temp = Artest.new
+      assert_in_delta(6.50, temp.earnedmoney(1000), 0.05)
+    end
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_instance_of String, temp.insult(1)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_kind_of String, temp.insult(1)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_respond_to temp, :appreciate
+    response = temp.appreciate(1)
+    assert_responds_to response, :upcase
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_match /Kevin/, temp.appreciate(1)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+     assert_no_match /\d+/, temp.appreciate(1)
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    obj1 = Artest.new
+    obj2 = obj1
+    obj3 = Artest.new
+    assert_same obj1, obj2
+    assert_same obj1, obj3
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    obj1 = Artest.new
+    obj2 = obj1
+    obj3 = Artest.new
+    assert_same obj1, obj3
+    assert_same obj1, obj2
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    obj1 = Artest.new
+    obj3 = Artest.new
+     assert_operator obj1, :==, obj2
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_throws :awesome do
+      throw :awesome if temp.appreciate(1) == "Kevin is great!"
+    end
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_send [temp, :appreciate, 1]
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    if temp.appreciate(1).include?("Kevin")
+      flunk "Kevin was found in our text!"
+    else
+      flunk "Kevin was not found in our text!"
+    end
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+
+class TestArtest < Test::Unit::TestCase
+  def test_simple
+    temp = Artest.new
+    assert_equal("Kevin is great!", temp.appreciate(1))
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+require 'active_record/fixtures'
+Fixtures.create_fixtures("c:\\ruby\\", :accounts)
+
+class TestArtest < Test::Unit::TestCase  
+  def test_simple
+    temp = Artest.new
+    assert_equal("Kevin is great!", temp.appreciate(1))
+  end
+end
+
+# test_artest.rb Unit Test example
+require 'artest'
+require 'test/unit'
+require 'active_record/fixtures'
+Fixtures.create_fixtures("c:\\ruby\\", :accounts)
+
+class TestArtest < Test::Unit::TestCase  
+  use_transactional_fixtures = true
+  def test_simple
+    temp = Artest.new
+    assert_equal("Kevin is great!", temp.appreciate(1))
+  end
+end
+
+# Test data set in YAML format saved as account.yml
+<% 1000.times do |i| %>Kevin<%= i %>:
+  id: <%= i %>
+  username: Kevin<%= i %>
+<% end %>
+
+# Test data set in YAML format saved as account.yml
+Kevin:
+  id: 1
+  username: Kevin
+Catherine:
+  id: 2
+  username: Catherine
+
+# Test data set in CSV format saved as account.csv
+id, username
+1,Kevin
+2,"Marshall, Catherine"
+3,"Married ""with children"""
+
+# Test data record in Single File format saved as kevin.txt
+id => 1
+username => Kevin
+
+# Test data record in Single File format saved as catherine.txt
+id => 2
+username => Marshall, Catherine
+
+# program that throws a general ActiveRecordError
+require 'rubygems'
+require_gem 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+end
+
+begin
+  raise ActiveRecord::ActiveRecordError if Account.find(1).username == "Kevin"
+rescue ActiveRecordError => e
+  puts "ActiveRecordError thrown: #{e}"
+end
+
+# data stored in our database (represented here in CSV format to save space)
+id,username,type
+1,Kevin,Husband
+2,Catherine,Wife
+
+# program that throws SubclassNotFound
+require 'rubygems'
+require_gem 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+end
+
+class Husband < Account
+end
+
+begin
+  temp = Account.find(2)
+  puts temp.inspect
+rescue  ActiveRecord::SubclassNotFound => e
+  puts "SubclassNotFound: #{e}"
+end
+
+# program to raise an AssociationTypeMismatch error
+require 'rubygems'
+require 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Pet < ActiveRecord::Base
+  has_many :cats
+end
+
+class Cat < ActiveRecord::Base
+  belongs_to :pet
+end
+
+class Dog
+  attr_accessor :name
+end
+
+temp = Pet.find(1)
+p1 = Dog.new
+p1.name = "Abby"
+temp << p1 # => raises the AssociationTypeMismatch error
+
+# program that raises a SerializationTypeMismatch error
+require 'rubygems'
+reuiqre 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+  serialize :yamldata, Array
+end
+
+temp = Account.find(1)
+temp.yamldata = {:problem => "expecting Array, not Hash"}
+
+# program that raises a AdapterNotSpecified error
+require 'rubygems'
+reuiqre 'activerecord'
+
+ActiveRecord::Base.establish_connection(:host => "mydbhost.com",
+:database => "test", :username => "sa", :password => "")
+
+# program that raises a AdapterNotFound error
+require 'rubygems'
+reuiqre 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "slqserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+# program that raises a ConnectionNotEstablished error
+require 'rubygems'
+reuiqre 'activerecord'
+
+class Account < ActiveRecord::Base
+end
+
+temp = Account.find(1)
+
+# program that raises a RecordNotFound error
+require 'rubygems'
+reuiqre 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+end
+
+temp = Account.find(1,0)
+
+# program that raises a StatementInvalid error
+require 'rubygems'
+reuiqre 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver", :host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+end
+
+temp = Account.find_by_sql("select * from accounts where kevin = 'username'")
+
+# program that raises a PreparedStatementInvalid error
+require 'rubygems'
+reuiqre 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+end
+
+temp = Account.find(:first, 
+  :conditions => ["username = ? and password = ?", "kevin"])
+
+# program that raises a StaleObjectError error
+require 'rubygems'
+reuiqre 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+end
+
+t1 = Account.find(1)
+t2 = Account.find(1)
+
+t1.username = 'Kevin Marshall'
+t1.save
+
+t2.username = 'Kevin Nelson Marshall'
+t2.save
+
+# program that raises a ConfigurationError error
+require 'rubygems'
+reuiqre 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+end
+
+temp = Account.find(1, :include => :friends)
+
+mylog = Logger.new('mylog.txt')
+
+ActiveRecord::Base.logger = mylog
+
+# Program to show ActiveRecord Logging in Action. (artest.rb)
+require 'rubygems'
+require_gem 'activerecord'
+
+class Account < ActiveRecord::Base
+  set_table_name "accounts"
+  has_many :comments
+end
+
+class Comment < ActiveRecord::Base
+  set_table_name "comments"
+  belongs_to :account
+end
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+mylog = Logger.new('mylog.txt')
+ActiveRecord::Base.logger = mylog
+
+temp = Account.find(1)
+mylog.info("found a record with username: #{temp.username}")
+
+mylog.info("About to show comments")
+temp.comments.each do |rec|
+  puts "#{temp.username} said #{rec.subject}"
+end
+mylog.info("Done showing comments")
+
+FaliconMobileMac:~ falicon$ ruby artest.rb
+
+# test program to show benchmark in action
+require 'rubygems'
+require_gem 'activerecord'
+
+class Account < ActiveRecord::Base
+  set_table_name "accounts"
+  has_many :comments
+end
+
+class Comment < ActiveRecord::Base
+  set_table_name "comments"
+  belongs_to :account
+end
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbhost.com", :database => "test", :username => "sa", :password => "")
+
+mylog = Logger.new(STDOUT)
+ActiveRecord::Base.logger = mylog
+
+Account.benchmark("Testing benchmark") do
+  temp = Account.find(1)
+  temp.comments.each do |rec|
+    puts "#{temp.username} said #{rec.subject}"
+  end
+end
+
+FaliconMobileMac:~ falicon$ ruby artest.rb

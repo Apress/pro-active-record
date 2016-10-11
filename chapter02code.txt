@@ -1,0 +1,276 @@
+account = Account.new
+account.username = “cpytel”
+account.password = “secret”
+account.save
+
+INSERT INTO accounts (‘username’, ‘password’) VALUES (‘cpytel’, ‘secret’)
+
+class Person < ActiveRecord::Base
+	belongs_to :parent, :class_name => “Person”
+	has_many :children, :class_name => “Person”, :foreign_key => :parent_id
+end
+
+person_1 = Person.new :first_name => ‘Bonnie’, :last_name => ‘Pytel’
+person_2 = Person.new :first_name => ‘Chad’, :last_name => ‘Pytel’
+person_1.children << person_2
+person_1.save
+
+INSERT INTO people (`first_name`, `last_name`) VALUES (`Bonnie`,`Pytel`)
+INSERT INTO people (`first_name`, `last_name`, `parent_id`) VALUES (`Chad`, `Pytel`, 1)
+
+book = Book.find 5
+
+SELECT* FROM books WHERE (id = 5)
+
+books = Book.find 1, 3, 5, 7, 9
+
+SELECT * FROM books WHERE (id IN ( 1, 3, 5, 7, 9 ))
+
+Account.find :all
+# SELECT * FROM accounts
+Account.find :first
+# SELECT * FROM accounts LIMIT 1
+
+Account.find :all, :conditions => “keyword = ‘ruby’”
+Account.find :all, :conditions => { :keyword => ‘ruby’ }
+Account.find :all, :conditions => [ “keyword = ?”, ‘ruby’ ]
+
+SELECT * FROM accounts WHERE keyword = ‘ruby’
+
+Account.find :all, :conditions => { :first_name =>  @first_name, :last_name => @last_name, :favorite_band_id => nil }
+
+SELECT * FROM accounts WHERE “first_name = ‘John’ AND last_name = ‘Doe’ AND favorite_band_id IS NULL”
+
+Account.find :all, :conditions => [“updated_on > ? OR id IN (?)”, @last_update, [ 2, 3, 5, 7, 11 ] ]
+
+SELECT * from accounts WHERE updated_on > ‘20061214 15:29:12’ OR id IN (2, 3, 5, 7, 11)
+
+class Person < ActiveRecord::Base
+  has_many :favorites
+end
+
+class Favorite < ActiveRecord::Base
+  belongs_to :person
+  belongs_to :band
+end
+
+class Band < ActiveRecord::Base
+  belongs_to :location
+end
+
+class Location < ActiveRecord::Base
+end
+
+city = ‘Boston’
+Person.find :all, :include => { :favorites => { :bands => { :location => {} } } }, :conditions => [“locations.city = ?”, city]
+
+SELECT * FROM people LEFT OUTER JOIN favorites ON people.id=favorites.person_id LEFT OUTER JOIN bands ON favorites.band_id=bands.id LEFT OUTER JOIN locations ON bands.location_id=locations.id WHERE locations.city = `Boston`
+
+class Person < ActiveRecord::Base
+  belongs_to :parent, :class_name => “Person”
+  has_many :children, :class_name => “Person”, :foreign_key => :parent_id
+end
+
+:include => { :parent => { :parent => {}}, :children => {}}
+
+Person.find :all, :include => { :parent => { :parent => {} }, :conditions => [“parents_people_2.name = ?”, name ]
+
+SELECT * FROM people LEFT OUTER JOIN people AS parents_people ON parents_people.id = people.person_id LEFT OUTER JOIN people AS parents_people_2 ON parents_people_2.id = parents_people.person_id
+
+SELECT people.`id` AS t0_r0, people.`person_id` AS t0_r1, people.`name` AS t0_r2, parents_people.`id` AS t1_r0, parents_people.`person_id` AS t1_r1, parents_people.`name` AS t1_r2, parents_people_2.`id` AS t2_r0, parents_people_2.`person_id` AS t2_r1, parents_people_2.`name` AS t2_r2 FROM …
+
+Account.find :all, :order => “created_on DESC, last_name, first_name”
+
+SELECT * FROM accounts ORDER BY created_on DESC, last_name, first_name
+
+SELECT *, “extra data” FROM accounts
+
+Account.find :all, :group => “last_name”
+
+SELECT * FROM accounts GROUP BY last_name
+
+Account.find :all, :select => “COUNT(last_name) AS total, *”, :group => “last_name”
+
+SELECT COUNT(last_name) AS total, * FROM accounts GROUP BY last_name
+
+Account.find :all, :joins => “LEFT OUTER JOIN visits ON accounts.id=visits.account_id”
+
+SELECT * FROM accounts LEFT OUTER JOIN visits ON accounts.id=visits.account_id
+
+Account.find :all, :from => “visits LEFT OUTER JOIN accounts ON visits.account_id=accounts.id”
+
+SELECT * FROM visits LEFT OUTER JOIN accounts ON visits.account_id=accounts.id
+
+Account.find :all, :limit => 10, :offset => 20
+
+SELECT * FROM accounts LIMIT 10 OFFSET 20 
+
+
+Person.find_by_username @username
+Song.find_all_by_artist_id_and_genre @artist.id, @genre
+
+Person.find :first, :conditions => { :username => @username }
+Song.find :all, :conditions => { :artist_id => @artist.id, :genre => @genre }
+
+HTW2, Dairy
+HTZ3, Meat
+HTW3, Dairy
+HTH9, Product
+
+p = Product.new(:number => @product_number)
+p.category = Category.find_or_create_by_name(@category_name)
+p.save
+
+song.name = “Ruby Dear”
+song.save
+
+song.update_attribute :name, “Ruby Dear”
+song.update_attributes :name => “Ruby Dear”
+
+UPDATE songs SET `name` = ‘Ruby Dear’, `artist` = ‘Talking Heads’ WHERE id = 2
+
+p = Product.find 1
+p.category.name = “Changed”
+p.save
+
+p = Product.find 1
+p.category.name = “Changed”
+p.category.save
+
+song = Song.find(3)
+song.destroy
+
+DELETE FROM songs WHERE id = 3
+
+Song.destroy( 10, 11, 20 )
+
+DELETE FROM songs WHERE id IN (10,11,20)
+
+Song.destroy_all :artist => “Garth Brooks”
+
+DELETE FROM songs WHERE artist = “Garth Brooks”
+
+class Person < ActiveRecord::Base
+	belongs_to :parent, :class_name => “Person”
+	has_many :children, :class_name => “Person”, :foreign_key => :parent_id :dependent => :destroy
+end
+
+bm = Person.new(:first_name => “Bob”, :last_name => “McCracken”)
+pm = Person.new(:first_name => “Pam”, :last_name => “McCracken”)
+jm = Person.new(:first_name => “Joey”, :last_name => “McCracken”)
+
+bm.children << pm
+bm.children << jm
+bm.save
+
+BEGIN
+INSERT INTO people (`first_name`, `last_name`, `parent_id`) VALUES('Bob', 'McCracken', 0)
+INSERT INTO people (`first_name`, `last_name`, `parent_id`) VALUES('Pam', 'McCracken', 1)
+INSERT INTO people (`first_name`, `last_name`, `parent_id`) VALUES('Joey', 'McCracken', 1)
+COMMIT
+
+bm = People.find_by_first_name_and_last_name(“Bob”, “McCracken”)
+bm.destroy
+
+SELECT * FROM people WHERE (people.parent_id = 1) 
+BEGIN
+SELECT * FROM people WHERE (people.parent_id = 2) 
+DELETE FROM people WHERE `id` = 2
+SELECT * FROM people WHERE (people.parent_id = 3) 
+DELETE FROM people WHERE `id` = 3
+DELETE FROM people WHERE `id` = 1
+COMMIT
+
+BEGIN
+DELETE FROM people WHERE (parent_id = 1) 
+DELETE FROM people WHERE `id` = 1
+COMMIT
+
+Song.find_by_sql(“SELECT users.* FROM users”)
+
+UPDATE accounts SET balance=balance-300.00 WHERE id=;
+UPDATE accounts SET balance=balance+300.00 WHERE id=4
+
+BEGIN
+  UPDATE accounts SET balance=balance-300.00 WHERE id=3
+  UPDATE accounts SET balance=balance+300.00 WHERE id=4
+COMMIT
+
+my_account.update_attribute(:balance, my_account.balance-300)
+your_account.update_attribute(:balance, your_account.balance+300)
+
+my_account = Account.find 3
+your_account = Account.find 4
+Account.transaction do
+  my_account.update_attribute(:balance, my_account.balance-300)
+  your_account.update_attribute(:balance, your_account.balance+300)
+end
+
+SELECT * FROM accounts WHERE id=3;
+SELECT * FROM accounts WHERE id=4;
+BEGIN;
+  UPDATE accounts SET balance=20.00 WHERE id=3;
+  UPDATE accounts SET balance=340.00 WHERE id=4;
+COMMIT;
+
+class Account < ActiveRecord::Base
+  def withdraw amount
+    update_attribute(:balance, balance-amount)
+    if balance < 0
+      raise
+    end
+  end
+  
+  def deposit amount
+    update_attribute(:balance, balance+amount)
+  end
+end
+
+my_account = Account.find 3
+your_account = Account.find 4
+Account.transaction do
+  my_account.withdraw(300)
+  your_account.update_attribute(300)
+end
+
+SELECT * FROM accounts WHERE id=3;
+SELECT * FROM accounts WHERE id=4;
+BEGIN;
+  UPDATE accounts SET balance=-280.00 WHERE id=3;
+ROLLBACK;
+
+class Account < ActiveRecord::Base
+  def withdraw amount
+    update_attribute(:balance, balance-amount)
+    if balance < 0
+      raise
+    end
+  end
+  
+  def deposit amount
+    update_attribute(:balance, balance+amount)
+  end
+end
+
+my_account1 = Account.find 3
+my_account2 = Account.find 3
+
+my_account1.withdraw 20
+my_account1.save
+
+my_account2.withdraw 40
+my_account2.save # This line raises an ActiveRecord::StaleObjectError
+
+Account.find 3, :lock => true
+
+SELECT * FROM accounts WHERE id=3 FOR UPDATE
+
+Account.find 3, :lock => “LOCK IN SHARE MODE”
+
+SELECT * FROM accounts WHERE id=3 LOCK IN SHARE MODE
+
+my_account = Account.find 3
+my_account.lock!
+
+SELECT * FROM accounts WHERE id=3
+SELECT * FROM accounts WHERE id=3 FOR UPDATE

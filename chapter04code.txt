@@ -1,0 +1,516 @@
+
+class Account < ActiveRecord::Base
+    def before_save
+        self.Account_Updated = Time.now
+    end
+end
+
+class Topic < ActiveRecord::Base
+    def before_destroy()
+        destroy_author
+    end
+end
+class Reply < Topic
+    def before_destroy()
+        destroy_readers
+    end
+end
+
+class Reply < Topic
+    def before_destroy()
+        destroy_readers
+        super.destroy_author
+    end
+end
+
+class Topic < ActiveRecord::Base
+    before_destroy :destroy_author
+end
+class Reply < Topic
+    before_destroy :destroy_readers
+end
+
+class Account < ActiveRecord::Base
+    before_save :setupdate
+private
+    def setupdate
+        self.Account_Update = Time.now
+    end
+end
+
+class Account < ActiveRecord::Base
+    before_save AccountChecks.new
+end
+
+    def before_save(record)
+        record.Account_Update = Time.now
+    end
+end
+
+class Account < ActiveRecord::Base
+    before_save 'self.Account_Update = Time.now'
+end
+
+class Account < ActiveRecord::Base
+    before_save 'self.Account_Update = "Updated at #{Time.now}"'
+end
+
+class Account < ActiveRecord::Base
+    before_save :setupdate, :setloggedin
+private
+    def setupdate
+        self.Account_Updated = Time.now
+    end
+    def setloggedin
+        self.Account_LoggedIn = Time.now
+    end
+end
+
+class Account < ActiveRecord::Base
+    before_save 'self.Account_Update = Time.now', 'self.Account_LoggedIn = Time.now'
+end
+
+class Account < ActiveRecord::Base
+    cattr_accessor :Account_fullname
+    def after_find
+        self.Account_fullname = self.Account_firstname + " " + self.Account_lastname
+    end
+end
+
+useraccount = Account.find(1)
+puts "Found account for #{useraccount.Account_fullname}" 
+#=> Found account for Kevin Marshall
+
+class Account < ActiveRecord::Base
+    cattr_accessor :Account_initialized
+    def after_initialize
+        self.Account_initialized = Time.now
+    end
+end
+
+useraccount = Account.new
+puts "Account object created #{useraccount.Account_initialized}"
+#=> Account object created Sun Jul 9 10:09:32 Eastern Standard Time 2006
+
+class Account < ActiveRecord::Base
+    def before_save
+        self.Account_updated = Time.now
+    end
+end
+
+class Account < ActiveRecord::Base
+    cattr_accessor :Account_lastsaved
+    def after_save
+        self.Account_lastsaved = Time.now
+    end
+end
+
+example = Account.new(:Account_Name => "Kevin")
+example.save
+puts Account.Account_lastsaved 
+# Sun Oct 15 21:41:39 Eastern Standard Time 2006
+
+class Account < ActiveRecord::Base
+    def before_create
+        self.Account_updated = Time.now
+    end
+end
+
+Example = Account.new(:Account_Name => "Kevin")
+puts Account_updated      # Sun Oct 15 21:41:39 Eastern Standard Time 2006
+
+class Account < ActiveRecord::Base
+    def after_create
+        logger.info( "Account was created at #{Time.now}" )
+    end
+end
+
+class Account < ActiveRecord::Base
+  def before_update
+    self.Account_updated = Time.now
+  end
+end
+
+Account.update(1,{:Account_Name => "Kevin Nelson"}) 
+# Account_updated would now have the current time
+
+class Account < ActiveRecord::Base
+  def after_update
+    logger.info("Account was updated at #{Time.now}")
+  end
+end
+
+Account.update(1,{:Account_Name => "Kevin Nelson"})
+# Logger now has a record and time of our update
+
+class Account < ActiveRecord::Base
+  def before_validation
+      logger.info("Account data about to be validated")
+  end
+end
+
+class Account < ActiveRecord::Base
+  def after_validation
+    logger.info("data passed all validations")
+  end
+end
+
+class Account < ActiveRecord::Base
+  def before_validation_on_create
+    logger.info("Account data about to be validated for new record")
+  end
+end
+
+class Account < ActiveRecord::Base
+  def after_validation_on_create
+    logger.info("Account data passed all validations for a new record")
+  end
+end
+
+class Account < ActiveRecord::Base
+  def before_validation_on_update
+    logger.info("Account data about to be validated for existing record")
+  end
+end
+
+class Account < ActiveRecord::Base
+  def after_validation_on_update
+    logger.info("Account data passed all validations for existing record")
+  end
+end
+
+class Account < ActiveRecord::Base
+  def before_destroy
+      Contacts.delete_all(["Account_ID = ?", self.Account_ID])
+  end
+end
+
+class Account < ActiveRecord::Base
+  def after_destroy
+    logger.info("Account record was deleted")
+  end
+end
+
+create table :cows do |t|
+  t.column :name, :string
+  t.column :farmer_id, :integer
+end
+create table :farmer do |t|
+  t.column :name, :string
+t.column :address, :string
+end
+create table :reseller do |t|
+  t.column :name, :string
+  t.column :address, :string
+end
+create table :farmers_resellers do |t|
+  t.column :resller_id, :integer
+  t.column :farmer_id, :integer
+end
+create table :distributors do |t|
+  t.column :reseller_id, :integer
+  t.column :farmer_id, :integer
+  t.column :milk_price, :float
+end
+
+class Cow < ActiveRecord::Base
+    belongs_to :farmer
+end
+
+# this is the T-SQL version (MS SQL Server uses T-SQL)
+cow = Cow.find_by_sql("Select farmer.name as farmername from
+  cow inner join farmer on cow.farmer_id = farmer.farmer_id")
+puts cow[0].farmername # => "Farmer Fred"
+
+cow = Cow.find(:first)
+cow.farmer.name # => "Farmer Fred"
+
+class Farmer < ActiveRecord::Base
+    has_many :cows
+end
+
+# this is the T-SQL version (MS SQL Server uses T-SQL)
+cowlist = Farmer.find_by_sql(["Select cows.name as cowname from
+  farmer inner join cows on farmer.farmer_id = cows.farmer_id where farmer_id = ?",1])
+cows.each do |rec|
+  print rec.cowname + ", "
+end
+# => Bessie, Spotty,
+
+fred = Farmer.find(1)
+fred.cows each do |cow|
+  print cow.name + ", "
+end
+# => Bessie, Spotty,
+
+create table :tractors do |t|
+  t.column :name, :string
+  t.column :farmer_id, :integer
+end
+
+class Farmer < ActiveRecord::Base
+  has_many :cows
+  has_one :tractors
+end
+
+# this is the T-SQL version (MS SQL Server uses T-SQL)
+tractor = Farmer.find_by_sql(["Select tractor.name as tractorname from
+  farmer inner join tractors on farmer.farmer_id = tractors.farmer_id where farmer_id = ?",1])
+tractors.each do |rec|
+  print rec.cowname
+end
+# => Big Red
+
+tractor = Farmer.find(1)
+tractor.tractors each do |tractor|
+  print tractor.name
+end
+# => Big Red
+
+class Reseller < ActiveRecord::Base
+  has_and_belongs_to_many :farmers
+end
+class Farmer < ActiveRecord::Base
+  has_many :cows
+  has_one :tractors
+  has_and_belongs_to_many :resellers
+end
+
+# this is the T-SQL version (MS SQL Server uses T-SQL)
+resellerlist = Farmer.find_by_sql(["Select resellers.name as resellername from
+  farmer, farmer_reseller, reseller where farmer.farmer_id = farmer_reseller.farmer_id and
+  farmer_reseller.reseller_id = reseller.reseller_id and farmer.farmer_id = ?",1])
+resellerlist.each do |rec|
+  print rec.resllername + ", "
+end
+# => Dairy Barn, McDonalds, 
+
+fred = Farmer.find(1)
+fred.resellers each do |rec|
+  print rec.name + ", "
+end
+# => Dairy Barn, McDonalds,
+
+class Reseller < ActiveRecord::Base
+  has_many :distributions
+  has_many :farmers, :through => :distributions
+end
+class Distributions < ActiveRecord::Base
+  belongs_to :reseller
+  belongs_to :farmer
+end
+class Farmer < ActiveRecord::Base
+  has_many :distributions
+  has_many :resellers, :through => :distributions
+end
+
+# this is the T-SQL version (MS SQL Server uses T-SQL)
+milkprice = Farmer.find_by_sql(["Select farmers.name as farmer,
+  resellers.name as reseller, distributors.milk_price as price from farmer,
+  distributors, reseller where farmer.farmer_id = distributors.farmer_id and
+  distributors.reseller_id = reseller.reseller_id and farmer.farmer_id = ?",1])
+milkprice.each do |rec|
+  puts "#{rec.farmer} sells to #{rec.reseller} for $#{rec.price} per gallon"
+end
+# Fred sells to Mary's Market for $0.50 per gallon
+# Fred sells to Sam's Shop for $0.65 per gallon
+
+fred = Farmer.find(:first)
+fred.distributions.each do |distribution|
+  puts "#{distribution.farmer.name} sells to #{distribution.reseller.name} for
+  $#{distribution.price} per gallon"
+end
+# sells to Mary's Market for $0.50 per gallon
+# sells to Sam's Shop for $0.65 per gallon
+
+puts fred.resellers.size # => 2
+Distribution.create( :farmer => fred, :reseller => sallys_store )
+puts fred.resellers(true).size # => 3
+
+class Farmer < ActiveRecord::Base
+  has_many :cows, :conditions => "farmer.name = 'Fred'"
+end
+
+class Account < ActiveRecord::Base
+  has_many :comment, :class_name => "comment"
+End
+class Comment < ActiveRecord::Base
+end
+
+Temp = Account.find(:all)
+Temp.each do |rec|
+  Puts rec.comment.collect {|c| c.subject}
+  # =>  Note we used comment instead of comments.
+end
+
+class Person < ActiveRecord::Base
+  has_many :children, :class_name => "Person", :foreign_key => "parent_id"
+end
+
+create table :addresses do |t|
+  t.column :street, :string
+  t.column :city, :string
+  t.column :addressable_id, :integer
+  t.column :addressable_type, :string
+end
+
+class Address < ActiveRecord::Base
+  belongs_to :addressable, :polymorphic => true
+end
+class Farmer < ActiveRecord::Base
+  has_one :address, :as => :addressable
+end
+class Reseller < ActiveRecord::Base
+  has_one :address, :as => :addressable
+end
+
+Example = Reseller.find(:first)
+Puts example.address.city # => Edinboro
+Example = Farmer.find(:first)
+Puts example.address.city # => Somerville
+
+class Farmers < ActiveRecord::Base
+  has_and_belongs_to_many :resellers, :join_table "distributors"
+end
+class Resellers < ActiveRecord::Base
+  has_and_belongs_to_many :farmers, :join_table "distributors"
+end
+
+class Farmer < AR::Base
+    has_and_belongs_to_many :shared_tractors, :association_foreign_key => "tractor_id"
+end
+
+def before_destroy
+    association.each {|each| each.destroy }
+end
+
+Class account < ActiveRecord::Base
+protected
+    def validate
+        if self.Account_Name == nil
+            errors.add(":Account_Name", "You must supply an account name")
+        elsif self.Account_Name != "Kevin"
+            errors.add(":Account_Name", "Account name must be Kevin!")
+        end
+    end
+end
+
+Class account < ActiveRecord::Base
+protected
+    def validate_on_create
+        if self.Account_Name == nil
+            errors.add(":Account_Name", "You must supply an account name")
+        elsif self.Account_Name != "Kevin"
+            errors.add(":Account_Name", "Account name must be Kevin!")
+        end
+    end
+end
+Class account < ActiveRecord::Base
+protected
+    def validate_on_update
+        if self.Account_Name == nil
+            errors.add(":Account_Name", "You must supply an account name")
+        elsif self.Account_Name != "Kevin"
+            errors.add(":Account_Name", "Account name must be Kevin!")
+        end
+    end
+end
+
+Class Account < ActiveRecord::Base
+    validates_each :Account_Name do |rec, attr, val|
+        if val != "Kevin"
+            rec.errors.add(":Account_Name", "Account name must be Kevin!")
+        end
+    end
+end
+
+Class Account < ActiveRecord::Base
+    Validates_each :Account_Name, :on => :update do |rec, attr, val|
+        If val != "Kevin"
+            Rec.errors.add(":Account_Name", "Account name must be Kevin!")
+        end
+    end
+end
+
+Class account < ActiveRecord::Base
+    Validates_each :Account_name, :if => :checked do |rec, attr, val|
+        If val != "Kevin"
+            Rec.errors.add(":Account_Name", "Account name must be Kevin for this record!")
+        end
+    end
+private
+    def checked
+        return false if self.ID != 1
+    end
+end
+
+Class Account < ActiveRecord::Base
+    validates_confirmation_of :password
+end
+
+Class Account < ActiveRecord::Base
+    validates_acceptance_of :terms
+end
+
+<input type="checkbox" name="terms" value="accepted">
+class Account < ActiveRecord::Base
+    validates_acceptance_of :terms, :accept => "accepted"
+end
+
+Class Account < ActiveRecord::Base
+    validates_presence_of :Account_Name
+end
+
+Class Account < ActiveRecord::Base
+    validates_length_of :Account_Name, :is => 5
+end
+
+Class Account < ActiveRecord::Base
+    validates_uniqueness_of :Account_Username
+end
+
+Class Answer < ActiveRecord::Base
+    Validates_uniqueness_of :account_id, :scope => [:question_id]
+end
+
+Class Account < ActiveRecord::Base
+    validates_format_of :Account_Name, :with => /[a-zA-z]+/
+end
+
+Class Account < ActiveRecord::Base
+    validates_inclusion_of :Account_Name, :in => ["Kevin"]
+end
+
+class Account < ActiveRecord::Base
+    validates_exclusion_of :Account_Name, :in => ["Marshall"]
+end
+
+class Account < ActiveRecord::Base
+    has_many :accountrights
+    validates_associated :accountrights
+end
+class Accountright < ActiveRecord::Base
+    belongs_to :account
+end
+
+class Account < ActiveRecord::Base
+    has_many :accountrights
+    validates_associated :accountrights
+end
+class Accountright < ActiveRecord::Base
+    belongs_to :account
+    validates_associated :account
+end
+
+class Account < ActiveRecord::Base
+    has_many :accountrights
+end
+class Accountright < ActiveRecord::Base
+    belongs_to :account
+    validates_associated :account
+    validates_presence_of :account, :on => :update
+end
+
+class Account < ActiveRecord::Base
+    validates_numericality_of :Account_Age
+end

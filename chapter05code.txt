@@ -1,0 +1,563 @@
+
+ActiveRecord::Base.observers = :account_observer
+# above is the same as ActiveRecord::Base.observers = AccountObserver
+
+class AccountObserver < ActiveRecord::Observer
+  def after_save(record)
+    @@logger.info “Account ID #{record. ID} was just saved at #{Time.now}!”
+  end
+end
+
+class GenericObserver < ActiveRecord::Observer
+  observe Comment, Vote
+  def after_save(record)
+    Alerts.deliver_alert(info@falicon.com,”New posting”, record)
+  end
+end
+
+class Toptentopics < ActiveRecord::Base
+  has_many :toptenitems
+end
+class Toptenitems < ActiveRecord::Base
+  belongs_to :toptentopics
+  acts_as_list :scope => :toptentopic
+end
+
+class Toptenitems < ActiveRecord::Base
+  belongs_to :toptentopics
+  acts_as_list :scope => :toptentopic, :column => “listorder”
+end
+
+class Toptenitems < ActiveRecord::Base
+  belongs_to :toptentopics
+  acts_as_list :scope => “toptentopics_id = #{toptentopics_id} and posted > (sysdate – 365)” # => creates a list-like collection with the same toptentopic ids and that were posted to the system in the last year
+end
+class Toptenitems < ActiveRecord::Base
+  belongs_to :toptentopics
+  acts_as_list :scope => :toptentopics # => same as “toptentopics_id = #{toptentopics_id}”
+end
+
+class Toptentopic < ActiveRecord::Base
+  has_many :toptenitems
+end
+
+class Toptenitems < ActiveRecord::Base
+  belongs_to :toptentopics
+  acts_as_list :scope => :toptentopic
+end
+
+todayslist = Toptentopic(1)
+listdetails = todayslist.toptenitems
+Insert_at(value)
+
+Listdetails[0].insert_at(3) # => adjusts the ‘position’ column to now hold a value of 3 and if needed, updates other records so that no other item is at the 3rd position.
+
+Listdetails[0].move_lower # => swap the ‘position’ value for the listdetails[1] record
+
+Listdetails[0].move_higher # => swap the ‘position’ value for the listdetails[1] record
+
+Listdetails[0].move_to_bottom # => moves the first record to the end of the list
+
+Listdetails[3].move_to_top # => moves the third record to the top of the list (position = 1)
+
+Listdetails[0].remove_from_list # => removes the first record from the in-memory collection and subtracts one from each of the ‘lower’ items ‘position’ column values.
+
+Listdetails[0].increment_position # => the ‘position’ value would now be one number higher than it previously was
+
+Listdetails[3].decrement_position # => the ‘position’ value would be one number lower than it previously was.
+
+Listdetails[1].first?
+
+Listdata[1].last?
+
+Puts listdetails[1].higher_item.toptenitems_item # => the toptenitems_item of the item in the list just above the second record’s position (if there is no item above this one an error will be thrown because the nil object will not have a toptenitems_item attribute)
+
+Puts listdetails[0].lower_item.toptenitems_item # => the toptenitems_item of the item in the list just below the first record’s position (if there is no item below this one an error will be thrown because the nil object will not have a toptenitems_item attribute)
+
+class Comment < ActiveRecord::Base
+  acts_as_tree
+end
+
+Class Comment < ActiveRecord::Base
+  Acts_as_tree :foreign_key => “realtedID”
+end
+
+Class Comment < ActiveRecord::Base
+  Acts_as_tree :order => “comments_posted”
+end 
+
+class Comment < ActiveRecord::Base
+  acts_as_tree
+end
+
+temp = Comment.find(2)
+
+temp.ancestors.each do |rec|
+  puts rec.subject # => Post 1
+end
+
+puts temp.root.subject # => Post 1
+
+temp.siblings.each do |rec|
+  puts rec.subject # => Post 3
+end
+
+class Comment < ActiveRecord::Base
+  acts_as_nested_set
+end
+
+class Comment < ActiveRecord::Base
+  acts_as_nested_set :parent_column => “realtedID”
+end
+
+class Comment < ActiveRecord::Base
+  acts_as_nested_set :left_column => “lower_boundry”
+end
+
+class Comment < ActiveRecord::Base
+  acts_as_nested_set :right_column => “higher_boundry”
+end
+
+class Comment < ActiveRecord::Base
+  acts_as_nested_set :scope => :related  #=> actually uses the column related_id
+end
+class Comment < ActiveRecord::Base
+  acts_as_nested_set :scope => :related_id  #=> actually uses the column related_id
+end
+
+class Comment < ActiveRecord::Base
+  acts_as_nested_set :scope => “related_id = 0” # => limits to just those with a related_id of 0
+end
+
+class Comment < ActiveRecord::Base
+  acts_as_nested_set
+end
+
+temp = Comment.find(1)
+
+puts temp.root? #=> true
+
+puts temp.child? #=> false
+
+puts temp.unknown? #=> false
+
+temp2 = Comment.new(:subject => ‘node 4’)
+temp2.save
+temp.add_child(temp2)
+temp.save
+
+temp.children_count #=> 8 (assuming the add_child ran above)
+newexample = Comment.find(2)
+puts newexample.children_count #=> 2 (node 1 child 1 and node 1 child 2 )
+
+temp.full_set.each do |rec|
+  puts rec.subject #=> prints all 8 titles including the root, one per line
+end
+
+temp.all_children.each do |rec|
+  puts rec.subject #=> prints the 7 nested children, one per line
+end
+
+temp.direct_children.each do |rec|
+  puts rec.subject #=> prints node 1, node 2, and node 3. One per line
+end
+
+Comment.destroy(2) #=> deletes our node 1, node 1 child 1, and node 1 child 2 records. Also updates the rgt and lft columns of other records as needed to maintain the proper depth throughout the structure.
+
+Class Song < ActiveRecord::Base
+  Composed_of :songinfo, :class_name => “Songinfo”, 
+    :mapping => [%w(artist artist), %w(songtitle songtitle), %w(songlength songlength)]
+end
+
+Composed_of :userinfo, :mapping => (username username)
+Composed_of :personalstuff, :class_name => “userinfo”, :mapping => (username username)
+
+Composed_of :userinfo, :mapping => [“account_username”,”username”] # => set’s just the username attribute
+Composed_of :userinfo, :mapping => [[“account_username”,”username”], [“account_password”, “password”]] # => setting both the username and password attributes
+
+class Songinfo
+  attr_reader :artist, :songtitle, :songlength
+  def initialize(artist, songtitle, songlength)
+    @artist, @songtitle, @songlength = artist, songtitle, songlength
+  end
+  def  by_other_artist
+     Song.find(:all, :conditions => [“songtitle = ? and artist != ?”, songtitle, artist])
+  end
+end
+
+temp = Song.new
+temp.songinfo = Songinfo.new(“Catherine”,”get it done”,455)
+temp.save #= > adds 4,Catherine,get it done,455 to our table
+temp = Song.new
+temp.artist = “Brady”
+temp.songtitle = “bah goo bah”
+temp.songlength = 30
+temp.save # => adds 5,Brady,bah goo bah,30 to our table
+
+temp = Song.find(1) # => get the record with the primary key of id 1
+puts temp.songtitle + “:” + temp.artist # => traditional approach displays ruby disco:Kevin
+puts “is the same as from the value object”
+puts temp.songinfo.songtitle + “:” + temp.songinfo.artist # => value object approach displays ruby disco:Kevin 
+temp.songinfo.by_other_artist.each do |rec|
+    puts rec.artist # => Timothy
+end
+
+class ActiveRecord::Base
+  def hello_world
+    "Hello from #{class.name}, World! My ID is #{id}."
+  end
+end
+cow = Cow.find_by_name("Bessie")
+cow.hello_world # Hello from Cow, World! My ID is 5.
+
+require "ar_hello_world"
+
+Cow.find(:all, :conditions => ["breed = ? AND gallons_per_day >= ?", breed, amount])
+
+Cow.find(:all) do |cow|
+  cow.breed == breed
+  cow.gallons_per_day >= amount
+end
+
+class ActiveRecord::Base
+  class << self
+    def find_with_squirrel(*args, &blk)
+      # We'll get to this in a minute. But for now, don't break anything.
+      find_without_squirrel(*args, &blk)
+    end
+  
+    alias_method :find_without_squirrel, :find
+    alias_method :find, :find_with_squirrel
+  end
+end
+
+class ActiveRecord::Base
+  class << self
+    def find_with_squirrel(*args, &blk)
+      if blk
+        conditions = Squirrel::Conditions.new(&blk)
+        amount = args.first
+        options = args.last || {}
+        find_without_squirrel(amount, options.merge(:conditions => conditions.to_find_conditions))
+      else
+        find_without_squirrel(*args)
+      end
+    end
+  
+    alias_method :find_without_squirrel, :find
+    alias_method :find, :find_with_squirrel
+  end
+end
+
+class String
+  def method_missing method_name, *args
+    puts "You tried to call #{name} and I don't know what that means!"
+  end
+end
+"Hello".foo_method # =>  You tried to call foo_method and I don't know what that means!
+
+module Squirrel
+  class Conditions
+    def initialize(&blk)
+      @columns = []
+      blk.call(self) unless blk.nil?
+    end
+  
+    def method_missing(name, *args)
+      column = Column.new(name)
+      @columns << column
+      column
+    end
+  end
+end
+
+module Squirrel
+  class Column
+    attr_reader :name, :operator, :operand
+    def initialize(name)
+      @name = name
+    end
+    
+    [:==, :<, :>, :<=, :>=, :=~].each do |operator|
+      define_method(operator) do |operand|
+        @operator = operator
+        @operand = operand
+      end
+    end
+  end
+end
+
+module Squirrel
+  class Column
+    OPERATOR_MAP = {
+      :==  => "=",
+      :>=  => ">=",
+      :<=  => "<=",
+      :>   => ">",
+      :<   => "<",
+      :=~  => "LIKE"
+    }
+    
+    def to_find_conditions
+      [ "#{name} #{OPERATOR_MAP[operator]} ?", operand ]
+    end
+  end
+end
+
+module Squirrel
+  class Conditions
+    def to_find_conditions
+      sql_strings = []
+      arguments   = []
+      
+      columns.each do |column|
+        # Get the conditions of each column
+        sql_string, *column_arguments = column.to_find_conditions
+        
+        # Append them to the rest
+        sql_strings << sql_string
+        arguments   << column_arguments 
+      end
+      
+      # Build them up into the right format
+      full_sql_string = sql_strings.join(" AND ")
+      
+      # Return them in one nice, flat array
+      [ full_sql_string, arguments ].flatten
+    end
+  end
+end
+
+conditions = Squirrel::Conditions.new do |cow|
+  cow.breed == breed
+  cow.gallons_per_day >= amount
+end
+conditions.to_find_conditions  # => ["breed = ? AND gallons_per_day >= ?", "Holstien", 8]
+
+original_cows = Cow.find(:all, :conditions => ["breed = ? AND gallons_per_day >= ?", breed, amount])
+squirrel_cows = Cow.find(:all) do |cow|
+  cow.breed == breed
+  cow.gallons_per_day >= amount
+end
+
+original_cows == squirrel_cows # => true
+
+module Squirrel
+  class Conditions
+    def initialize(active_record, &blk)
+      @active_record = active_record
+      @columns = []
+      define_column_methods      
+      blk.call(self) unless blk.nil?
+    end
+    
+    def define_column_methods
+      (class << self; self; end).class_eval do
+        @active_record.column_names.each do |column|
+          define_method(column) do
+            column = Column.new(column_name)
+            @columns << column
+            column
+          end
+        end
+      end
+    end
+  
+    def method_missing(name, *args)
+      raise "The column #{name} was not found on the model #{@active_record.class.name}"
+    end
+  end
+end
+
+Cow.find(:all){ id == 2 }
+
+module Squirrel
+  class Conditions
+    def initialize(active_record, &blk)
+      @active_record = active_record
+      @columns = []
+      @associations = {}
+      
+      define_column_methods
+      define_association_methods
+      
+      blk.call(self) unless blk.nil?
+    end
+    
+    def define_association_methods
+      (class << self; self; end).class_eval do
+        association_names = @active_record.reflect_on_all_associations
+        
+        association_names.each do |association|
+          define_method(association) do
+            @associations[association] = Conditions.new(association.klass)
+          end
+        end
+      end
+    end
+    
+    def to_find_includes
+      includes = {}
+      @associations.each do |name, association|
+        includes[name.to_sym] = association.to_find_includes
+      end
+      includes
+    end
+  end
+end
+
+module Squirrel
+  class Conditions
+    def to_find_conditions
+      sql_strings = []
+      arguments   = []
+      
+      @associations.each do |name, association|
+        sql_string, *column_arguments = association.to_find_conditions
+        
+        sql_strings << sql_string
+        arguments   << column_arguments 
+      end
+      
+      @columns.each do |column|
+        sql_string, *column_arguments = column.to_find_conditions
+        
+        sql_strings << sql_string
+        arguments   << column_arguments 
+      end
+      
+      # Build them up into the right format
+      full_sql_string = sql_strings.join(" AND ")
+      
+      # Return them in one nice, flat array
+      [ full_sql_string, arguments ].flatten
+    end
+  end
+end
+
+Cow.find(:all) do |cow|
+  cow.farmer.state    == "MA"
+  cow.gallons_per_day >= 8
+end
+
+Cow.find(:all, :conditions => ["state = ? AND gallons_per_day >= ?", "MA", 8], :include => {:farmer => {}})
+
+class ActiveRecord::Base
+  def self.print_args(*args)
+    p args
+  end
+end
+
+class Cow < ActiveRecord::Base
+  print_args [1,2,3], { :one => 1 }
+end
+
+module Auditable
+  def included(base)
+    base.extend ClassMethods
+  end
+  
+  module ClassMethods
+    def audit_columns
+      @columns
+    end
+    
+    def audit *columns
+      include Auditable::InstanceMethods
+      extend  Auditable::SingletonMethods
+      
+      @columns = columns
+    end
+  end
+  
+  module InstanceMethods
+  end
+  
+  module SingletonMethods
+  end
+end
+
+class ActiveRecord::Base
+  include Auditable
+end
+
+class Cow < ActiveRecord::Base
+  audit :name, :gallons_per_day, :farmer_id
+end
+
+module InstanceMethods
+  def self.included(base)
+    base.class_eval do
+      audit_columns.each do |column|
+        define_method :"#{column}_with_auditing=" do |new_val|
+          @previous_attribute_values[column]       ||= {}
+          @previous_attribute_values[column][:old] ||= base.send(column)
+          @previous_attribute_values[column][:new]   = new_val
+          base.send(:"#{column}_without_auditing=", new_val)
+        end
+        
+        alias_method :"#{column}_without_auditing=", :"#{column}="
+        alias_method :"#{column}=", :"#{column}_with_auditing="
+      end
+    end
+  end
+end
+
+module InstanceMethods
+  def save_with_auditing(validations = true)
+    if save_without_auditing(validations)
+      @previous_attribute_values.each do |column, values|
+        Audit.create(:model => self, :column => column, :changed_from => values[:old], :changed_to => values[:new])
+      end
+      @previous_attribute_values = {}
+    end
+  end
+end
+
+module Encryptable
+  def included(base)
+    base.extend ClassMethods
+  end
+  
+  module ClassMethods
+    (class << self; self; end).class_eval do
+      attr_accessor :encryption_options
+    end
+    
+    def encrypt *columns
+      self.encryption_options = columns.last.is_a?(Hash) ? columns.pop : {}
+      
+      (class << self; self; end).class_eval do
+        columns.each do |column|
+          define_method :"#{column}_with_encryption" do
+            decrypt self.send(:#{column}_without_encryption)
+          end
+          alias_method :"#{column}_with_encryption", column
+          alias_method column, :"#{column}_without_encryption" 
+          
+          define_method :"#{column}_with_encryption=" do |new_val|
+            self.send(:"#{column}_without_encryption=", encrypt new_val)
+          end
+          alias_method :"#{column}_with_encryption=", :"#{column}="
+          alias_method :"#{column}=", :"#{column}_without_encryption=" 
+        end
+      end
+    end
+  end
+  
+  module InstanceMethods
+    def decrypt(data)
+      rot13(data)
+    end
+    
+    def encrypt(data)
+      rot13(data)
+    end
+    
+    def rot13(data)
+      data.tr("abcedfghijklmnopqrstuvwxyz",
+              "nopqrstuvwxyzabcedfghijklm").tr(
+              "ABCEDFGHIJKLMNOPQRSTUVWXYZ",
+              "NOPQRSTUVWXYZABCEDFGHIJKLM")
+    end
+  end

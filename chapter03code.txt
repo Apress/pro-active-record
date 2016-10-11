@@ -1,0 +1,99 @@
+
+require 'rubygems'
+require_gem 'activerecord'
+
+if ARGV[0] =~ /VERSION=\d+/
+  version = ARGV[0].split('=')[1].to_i
+else
+  version = nil
+end
+
+@logger = Logger.new $stderr
+ActiveRecord::Base.logger = @logger
+ActiveRecord::Base.colorize_logging = false
+
+@config = YAML.load_file(File.join(File.dirname(__FILE__), 'database.yml'))
+ActiveRecord::Base.establish_connection(@config["development"])
+ActiveRecord::Migrator.migrate("", version)
+
+class CreateUsersTable < ActiveRecord::Migration
+    def self.up
+    end
+
+    def self.down
+    end
+end
+
+# Script to create the first version of a Cows table
+def self.up
+    create_table :cows do |t|
+        t.column :name, :string
+        t.column :breed, :string
+        t.column :born_on, :datetime
+        t.column :milkable, :boolean
+    end
+end
+
+mysql> show tables;
+Empty set (0.12 sec)
+
+mysql> describe cows;
+
+mysql> show tables;
+
+mysql> select * from schema_info;
+
+def self.down
+    drop_table :cows
+end
+
+mysql> show tables;
+
+def self.up
+    add_column :cows, :farmer_id, :integer
+end
+
+def self.down
+    remove_column :cows, :farmer_id
+end
+
+mysql> describe cows;
+
+rename_column :cows, :born_on, :created_on
+
+change_column :address, :postal_code, :string
+
+add_index :cows, :farmer_id, :name => "index_on_cows_for_farmers"
+add_index :ownerships, [:farmer_id, :tractor_id], :unique => true
+
+remove_index :ownerships, :column => [:farmer_id, :tractor_id]
+
+remove_index :cows, :name => "index_on_cows_for_farmers"
+
+def self.up
+  add_column :orders, :total, :decimal
+
+  orders = Order.find(:all)
+  orders.each do |order|
+    subtotal = 0
+    order.line_items.each do |line_item|
+      subtotal += line_item.quantity * line_item.price
+    end
+    order.total = subtotal
+  end
+end
+
+def self.down
+  remove_column :orders, :total
+end
+
+def self.up
+  add_column :orders, :total, :decimal
+  ActiveRecord.execute("UPDATE orders LEFT OUTER JOIN line_items
+    SET orders.total=SUM(line_items.quantity * line_items.price) ON
+    orders.id=line_items.order_id")
+end 
+
+def self.down
+  remove_column :orders, :total
+end

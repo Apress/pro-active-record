@@ -1,0 +1,310 @@
+
+# Setting the primary_key_prefix_type
+ActiveRecord::Base.primary_key_prefix_type = :table_name
+class Account < ActiveRecord::Base
+end
+a = Account.find(1)
+#=> executes SQL equal to "Select * from accounts where accountid = 1" 
+
+# Setting the primary_key_prefix_type
+ActiveRecord::Base.primary_key_prefix_type = :table_name_with_underscore
+class Account < ActiveRecord::Base
+end
+a = Account.find(1)
+#=> executes SQL equal to "Select * from accounts where account_id = 1" 
+
+# Setting the table_name_prefix
+ActiveRecord::Base.table_name_prefix = "draftwizard_"
+class Account < ActiveRecord::Base
+end
+a = Account.find(1)
+#=> executes SQL equal to "Select * from draftwizard_accounts where id = 1"
+
+# Setting the table_name_suffix
+ActiveRecord::Base.table_name_suffix = "_draftwizard"
+class Account < ActiveRecord::Base
+end
+a = Account.find(1)
+#=> executes SQL equal to "Select * from accounts_draftwizard where id = 1"
+
+# Setting the pluralize_table_names
+ActiveRecord::Base.pluralize_table_names = false
+class Account < ActiveRecord::Base
+end
+a = Account.find(1) #=> executes SQL equal to "Select * from account where id = 1"
+
+# Specify colorize_logging
+ActiveRecord::Base.colorize_logging = false
+
+# Specify the default_timezone
+ActiveRecord::Base.default_timezone = :utc
+a = Account.find(1)
+puts a.created_on #=> Tue Jun 05 22:09:44 UTC 2007
+
+# Threaded example using concurrency
+require 'rubygems'
+require_gem 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "mysql",
+:database => "testdb", :username => "root", :password => "", :host => "localhost")
+ActiveRecord::Base.allow_concurrency = true
+
+class Direct < ActiveRecord::Base
+end
+
+threads = []
+20.times do |i|
+  t = Thread.new do
+    data = Direct.find(i + 1)
+    puts "Thread: #{i} #{data.contact_email}"
+  end
+  threads.push(t)
+end
+threads.each {|t| t.join }
+
+# Setting the generate_read_methods
+require 'rubygems'
+require_gem 'activerecord'
+require 'benchmark'
+
+ActiveRecord::Base.establish_connection(:adapter => "mysql",
+:database => "testdb", :username => "root", :password => "", :host => "localhost")
+ActiveRecord::Base.generate_read_methods = false
+
+class Account < ActiveRecord::Base
+end
+
+2.times do |x|
+  Account.benchmark("starting benchmark") do
+    temp = Account.find_by_username("Kevin")
+    puts temp.created_at
+  end
+end
+
+# Using the set_table_name method
+require 'rubygems'
+require_gem 'activerecord'
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "localhost", :username => "sa", :password => "", :database => "testdb")
+
+class Account < ActiveRecord::Base
+  set_table_name "members"
+end
+
+puts Account.find(1).inspect
+
+class Comment < ActiveRecord::Base
+  set_table_name {
+    d = ["feed","back"]
+    d.join
+  }
+end
+
+puts Comment.find(1).inspect
+
+# Using the set_table_name method
+require 'rubygems'
+require_gem 'activerecord'
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "localhost", :username => "sa", :password => "", :database => "testdb")
+
+class Account < ActiveRecord::Base
+  set_primary_key "account_id"
+end
+
+puts Account.find(1).inspect
+
+class Comment < ActiveRecord::Base
+  set_primary_key {
+    d = ["comm","ents","_id"]
+    d.join
+  }
+end
+
+puts Comment.find(1).inspect
+
+# Using the set_table_name method
+require 'rubygems'
+require_gem 'activerecord'
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "localhost", :username => "sa", :password => "", :database => "testdb")
+
+class Account < ActiveRecord::Base
+  set_inheritance_column "account_type"
+end
+
+class Reader < Account
+end
+
+puts Reader.find(1).inspect
+
+class Comment < ActiveRecord::Base
+  set_primary_key {
+    d = ["comm","ents","_category"]
+    d.join
+  }
+end
+
+class Storycomment < Comment
+end
+
+puts Storycomment.find(1).inspect
+
+# Setting sequence name with Oracle
+require 'rubygems'
+require_gem 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => 'oci',
+:host => 'test, :username => 'tester', :password => 'tester')
+
+class Account < ActiveRecord::Base
+  set_sequence_name "aid_seq"
+end
+
+acc = Account.new # => this should trigger the execution of the sequence aid_seq
+acc.username = 'Kevin'
+acc.save
+
+puts acc.id #=> this should display the value of the sequence we executed.
+
+# Example working with Legacy schema
+require 'rubygems'
+require_gem 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbserver", :database => "testdb", :username => "sa", :password => "")
+
+class Account < ActiveRecord::Base
+  set_table_name "members"
+  set_primary_key "Members_ID"
+end
+
+class Comments < ActiveRecord::Base
+  set_table_name "comments"
+  set_primary_key "Comments_ID"
+end
+
+class Direct < ActiveRecord::Base
+  set_table_name "direct"
+  set_primary_key "Direct_ID"
+end
+
+# Code snippet showing use of find_by_sql method in action
+acid = 1 #=> this is the id of the account we are going to generate the report for
+
+pc = Account.find_by_sql(["Select * from members, comments where
+members.members_id = ? and members.members_id = comments.members_id", accid])
+
+pc.each do |rec|
+  puts "#{rec.Members_Name} posted #{rec.Comments_Subject}"
+end
+
+# Code snippet showing find_by_sql as Array of ActiveRecord objects
+thecount = Direct.find_by_sql("select count(0) mycount from direct")
+puts thecount[0].mycount
+
+# Code snippet showing use of low level connection statements
+ins = ActiveRecord::Base.connection.insert("insert into
+  members(members_name, members_username, members_password)
+  values('Kevin', 'Falicon', 'CAKNTOBA')")
+puts ins #=> should return the id of the record that was inserted
+
+upd = ActiveRecord::Base.connection.update("update members set
+members_password = 'CAKNTOBA1' where members_id = #{ins}")
+puts upd #=> returns 0 regardless of if the update really ran or not!
+
+sel = ActiveRecord::Base.connection.select_all("select * from members
+where members_id = #{ins}")
+sel.each do |rec|
+  puts "Name: #{rec["Members_Name"]}  Username: #{rec["Members_Username"]"
+end
+
+del = ActiveeRecord::Base.connection.delete("delete members where members_id = #{ins}")
+puts del #=> returns 0 regardless of if the delete really ran or not!
+
+# Script showing use of custom function and sequences
+require 'rubygems'
+require_gem 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "oci",
+:host => "test", :username => "tester", :password => "tester")
+
+class Direct < ActiveRecord::Base
+end
+
+seqval = Direct.find_by_sql("select test_seq.nextval from dual")
+puts seqval[0].nextval
+#=> will display the next available value from the test_seq sequence
+
+cf = Direct.find_by_sql("select custfunc(123) myres from members where
+members_id = 1")
+puts ef[0].myres
+#=> will display the value that was returned from the custom
+# function custfunc when the value 123 was passed to the function.
+
+# Running an Oracle stored procedure
+require 'rubygems'
+require_gem 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "oci",
+:host => "test", :username => "tester", :password => "tester")
+
+res = ActiveRecord::Base.conection.execute("begin reset_sequence('test_seq'); end;")
+puts res.inspect
+#=> because our stored procedure does not return a value we get back an empty Array
+
+# Running a SQL Server stored procedure
+require 'rubygems'
+require_gem 'activerecord'
+
+ActiveRecord::Base.establish_connection(:adapter => "sqlserver",
+:host => "mydbserver.com", :database => "test", :username => "sa",
+:password => "", :autocommit => false)
+
+roles = ActiveRecord::Base.connection.select_all("exec sp_helprole")
+roles.each do |rec|
+  puts rec["RoleName"]
+end
+
+account.to_xml(:root => "myaccount")
+
+account.to_xml(:only => [ :last_name ])
+
+account.to_xml(:except => [ :last_name ])
+
+account.to_xml(:include => [ :site ])
+
+{"account"=>{"site_id"=>1, "id"=>1, "site"=>{"name"=>"Account Site", "id"=>1},
+"first_name"=>"Chad", "last_name"=>"Pytel",
+"created_at"=>Fri Nov 10 15:22:56 UTC 2006}} 
+
+accounts_xml_string = File.read("accounts.xml")
+accounts = Hash.create_from_xml(accounts_xml_string)
+accounts.each do |account|
+  if account["id"].nil? || !Account.exists?(account["id"])
+    Accounts.create(account)
+  else
+    Accounts.find(account["id"]).update_attributes(account)
+  end
+end
+
+Account.find(:all).to_yaml
+
+accounts_yaml_string = File.read("accounts.yml")
+accounts = YAML::parse(accounts_yaml_string).transform
+accounts.each { |account| account.save }
+
+headers = Account.content_columns.collect { |column| column.human_name }
+only_columns = Account.content_columns.collect { |column| column.name }
+accounts = Account.find(:all)
+outfile = File.open('csvoutput.csv', 'wb')
+CSV::Writer.generate(outfile, ',') do |csv|
+  csv << headers
+  accounts.each do |account|
+    csv << account..attributes(:only => only_columns).values
+  end
+end
+
+CSV::Reader.parse(File.open('accounts.csv', 'rb')) do |row|
+  Account.create(:last_name => row[0], :first_name => row[1])
+end
